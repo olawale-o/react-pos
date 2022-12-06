@@ -8,13 +8,18 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import io from 'socket.io-client';
+import Home, { action as loginAction, loader as homeLoader } from './pages/Home';
+
+const socket = io('http://localhost:4000');
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { path: 'chat', element: <Chat /> }
+      { index: true, element: <Home socket={socket} />, action: loginAction, loader: homeLoader },
+      { path: 'chat', element: <Chat socket={socket} /> }
     ]
   },
 ]);
