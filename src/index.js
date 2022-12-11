@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import Chat from './pages/Chat';
+import User from './pages/User';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -10,6 +11,8 @@ import {
 } from "react-router-dom";
 import io from 'socket.io-client';
 import Home, { action as loginAction, loader as homeLoader } from './pages/Home';
+import FriendSuggest from './pages/User/FriendSuggest';
+import Pending from './pages/User/Pending';
 
 const socket = io('http://localhost:4000');
 
@@ -19,7 +22,16 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <Home socket={socket} />, action: loginAction, loader: homeLoader },
-      { path: 'chat', element: <Chat socket={socket} /> }
+      { path: 'chat', element: <Chat socket={socket} /> },
+      {
+        path: 'users',
+        element: <User />,
+        children: [
+          { index: true, element: <FriendSuggest /> },
+          { path: 'friends', element: <FriendSuggest /> },
+          { path: 'pending', element: <Pending /> }
+        ]
+      }
     ]
   },
 ]);
