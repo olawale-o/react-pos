@@ -1,27 +1,28 @@
 import React from 'react';
 import { useNavigate, Form, redirect, useLoaderData } from 'react-router-dom';
+import { loginService } from '../../services/authService';
 
 export async function loader() {
-  return localStorage.getItem('userName');
+  return JSON.parse(localStorage.getItem('user'));
 }
 
 export async function action({ request }) {
   const formData = await request.formData();
-  const data = Object.fromEntries(formData);
-  localStorage.setItem('userName', data.username);
+  const formDataEntries = Object.fromEntries(formData);
+  const data = await loginService({ username: formDataEntries.username });
+  localStorage.setItem('user', JSON.stringify(data));
   return redirect('/');
 }
 
 const Home = ({ socket }) => {
-  const data = useLoaderData()
+  const data = useLoaderData();
   const navigate = useNavigate();
   const [userName, setUserName] = React.useState('');
 
-  
   React.useEffect(() => {      
     if (data !== null) {
-      socket.emit('online', { userName: data, socketID: socket.id });
-      navigate('/chat')
+      // socket.emit('online', { userName: data, socketID: socket.id });
+      navigate('/users');
     }
   }, [data, navigate, socket, userName]);
   return (
