@@ -20,3 +20,8 @@ export const acceptFriendRequestService = async (body) => {
   const data = await post('http://localhost:4000/api/v1/users/friends/accept', body);
   return data;
 };
+
+export const getFriendSuggestionService = async (query) => {
+  const data = await get(`http://localhost:4000/api/v1/users/suggestion?q=${query}`);
+  return data.suggestions;
+};
