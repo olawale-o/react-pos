@@ -1,5 +1,5 @@
 import React from 'react';
-import { getUnfollowedUsers, addFriendRequestService } from '../../services/friendService';
+import { getFriendSuggestionService, addFriendRequestService } from '../../services/friendService';
 
 const FriendSuggest = () => {
   const userData = JSON.parse(localStorage.getItem('user'))?.user;
@@ -7,14 +7,14 @@ const FriendSuggest = () => {
   React.useEffect(() => {
     async function getUsers() {
       try {
-        const data = await getUnfollowedUsers(userData.username);
+        const data = await getFriendSuggestionService(userData._id);
         setUsers(data)
       } catch (error) {
         console.log(error);
       }
     }
     getUsers();
-  }, [userData.username]);
+  }, [userData._id]);
   const addFriend = async (id) => {
     const data = await addFriendRequestService({ requester: userData._id, recipient: id });
     console.log(data)
