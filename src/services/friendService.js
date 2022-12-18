@@ -25,3 +25,8 @@ export const getFriendSuggestionService = async (query) => {
   const data = await get(`http://localhost:4000/api/v1/users/suggestion?q=${query}`);
   return data.suggestions;
 };
+
+export const getContactService = async (id) => {
+  const data = await get(`http://localhost:4000/api/v1/users/${id}`);
+  return data.user;
+};
