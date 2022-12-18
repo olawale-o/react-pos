@@ -13,6 +13,10 @@ import io from 'socket.io-client';
 import Home, { action as loginAction, loader as homeLoader } from './pages/Home';
 import FriendSuggest from './pages/User/FriendSuggest';
 import Pending from './pages/User/Pending';
+import Friend, { loader as contactLoader } from './pages/Friends/Friend';
+import FriendList from './pages/Friends/FriendList';
+import Friends from './pages/Friends';
+
 
 const socket = io('http://localhost:4000');
 
@@ -27,9 +31,17 @@ const router = createBrowserRouter([
         path: 'users',
         element: <User />,
         children: [
-          { index: true, element: <FriendSuggest /> },
-          { path: 'friends', element: <FriendSuggest /> },
-          { path: 'pending', element: <Pending /> }
+          { index: true, element: <FriendSuggest socket={socket} /> },
+          { path: 'users', element: <FriendSuggest socket={socket} /> },
+          { path: 'pending', element: <Pending socket={socket} /> }
+        ]
+      },
+      {
+        path: 'friends',
+        element: <Friends socket={socket} />,
+        children: [
+          { index: true, element: <FriendList socket={socket} /> },
+          { path: ':id', element: <Friend socket={socket} />, loader: contactLoader }
         ]
       }
     ]
