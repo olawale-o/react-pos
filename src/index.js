@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         path: 'friends',
         element: <Friends socket={socket} />,
         children: [
-          { index: true, element: <FriendList socket={socket} /> },
+          { index: true, element: <FriendList /> },
           { path: ':id', element: <Friend socket={socket} />, loader: contactLoader }
         ]
       }
