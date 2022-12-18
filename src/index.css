@@ -177,3 +177,16 @@ li {
   font-size: 1.5rem;
   line-height: 20px;
 }
+
+.online-icon {
+  width: 8px;
+  height: 8px;
+  background-color: green;
+  border-radius: 100%;
+  margin-left: 5px;
+}
+
+.user-link {
+  display: flex;
+  align-items: center;
+}
