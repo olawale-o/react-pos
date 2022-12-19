@@ -21,8 +21,8 @@ const Home = ({ socket }) => {
 
   React.useEffect(() => {      
     if (data !== null) {
-      // socket.emit('online', { userName: data, socketID: socket.id });
-      navigate('/users');
+      socket.emit('online', { id: data.user._id, username: data.user.username, socketID: socket.id });
+      navigate('/friends');
     }
   }, [data, navigate, socket, userName]);
   return (

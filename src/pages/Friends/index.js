@@ -4,7 +4,7 @@ import { getUnfollowedUsers } from '../../services/friendService';
 
 const MyFriends = ({ socket }) => {
   const [users, setUsers] = React.useState([]);
-  const [onlineUsers, setOnlineUsers] = React.useState({});
+  const [onlineUsers, setOnlineUsers] = React.useState([]);
   const userData = JSON.parse(localStorage.getItem('user')).user;
 
   React.useEffect(() => {
@@ -17,16 +17,11 @@ const MyFriends = ({ socket }) => {
       }
     }
     getUsers();
-  }, [userData.username]);
+  }, [userData.username, socket]);
 
   React.useEffect(() => {
     socket.on('appearance', (data) => {
-      const socketUsers = {};
-      data.forEach((onlineUser) => {
-        socketUsers[onlineUser._id] = { socketId: onlineUser.socketID }
-      });
-      localStorage.setItem('onlineUsers', JSON.stringify(socketUsers))
-      setOnlineUsers(socketUsers)
+      setOnlineUsers(data);
     });
   }, [socket, users]);
   return (
@@ -38,7 +33,7 @@ const MyFriends = ({ socket }) => {
           {users.map((user) => (
             <Link to={`${user._id}`} key={user._id} className="link user-link">
               <p>{user.username}</p>
-              {user._id in onlineUsers && 'online' && (<div className="online-icon" />)}
+              {onlineUsers.includes(user._id) && (<div className="online-icon" />)}
             </Link>
           ))}
         </div>

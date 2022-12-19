@@ -44,8 +44,6 @@ const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
 };
 
 const ChatFooter = ({ socket, contact }) => {
-  const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers'));
-  const userData = JSON.parse(localStorage.getItem('user')).user._id;
     let timeout  = setTimeout(function(){}, 0);
     const [message, setMessage] = React.useState('');
     const handleTyping = () => {
@@ -64,8 +62,8 @@ const ChatFooter = ({ socket, contact }) => {
         senderId: `${JSON.parse(localStorage.getItem('user')).user._id}`,
         recipientId: contact._id,
         socketID: socket.id,
-        recipientSocketId: onlineUsers[contact._id]?.socketId,
-        senderSocketId: onlineUsers[userData]?.socketId
+        recipientSocketId: contact.socketId,
+        senderSocketId: socket.id
       });
       setMessage('');
     }
