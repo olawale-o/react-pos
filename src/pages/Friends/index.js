@@ -4,8 +4,29 @@ import { getUnfollowedUsers } from '../../services/friendService';
 
 const MyFriends = ({ socket }) => {
   const [users, setUsers] = React.useState([]);
-  const [onlineUsers, setOnlineUsers] = React.useState([]);
+  // const [onlineUsers, setOnlineUsers] = React.useState([]);
   const userData = JSON.parse(localStorage.getItem('user')).user;
+  const [user, setUser] = React.useState({});
+
+
+  const checkIfUserExist = React.useCallback(() => {
+    console.log('callback')
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId && userData) {
+      socket.auth = {sessionId: sessionId};
+      socket.connect();
+    }
+  }, [socket, userData])
+
+  React.useEffect(() => {
+    checkIfUserExist();
+    socket.on('session', ({ sessionId, userId, username }) => {
+      console.log('session', { sessionId, userId, username });
+      socket.auth = { sessionId: sessionId };
+      localStorage.setItem('sessionId', sessionId);
+      setUser({ sessionId, userId, username})
+    })
+  }, [socket, checkIfUserExist]);
 
   React.useEffect(() => {
     async function getUsers() {
@@ -19,11 +40,6 @@ const MyFriends = ({ socket }) => {
     getUsers();
   }, [userData.username, socket]);
 
-  React.useEffect(() => {
-    socket.on('appearance', (data) => {
-      setOnlineUsers(data);
-    });
-  }, [socket, users]);
   return (
     <div className="chat-sidebar">
       <h2>Open Chat</h2>
@@ -33,7 +49,7 @@ const MyFriends = ({ socket }) => {
           {users.map((user) => (
             <Link to={`${user._id}`} key={user._id} className="link user-link">
               <p>{user.username}</p>
-              {onlineUsers.includes(user._id) && (<div className="online-icon" />)}
+              {/* {user._id && (<div className="online-icon" />)} */}
             </Link>
           ))}
         </div>
