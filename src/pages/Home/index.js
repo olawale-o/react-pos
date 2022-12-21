@@ -19,12 +19,14 @@ const Home = ({ socket }) => {
   const navigate = useNavigate();
   const [userName, setUserName] = React.useState('');
 
-  React.useEffect(() => {      
+  React.useEffect(() => {    
     if (data !== null) {
-      socket.emit('online', { id: data.user._id, username: data.user.username, socketID: socket.id });
+      socket.auth = { user: data.user }
+      socket.connect();
       navigate('/friends');
     }
-  }, [data, navigate, socket, userName]);
+  }, [data, navigate, socket]);
+
   return (
     <div>
       <Form method="post" className="home-container">
