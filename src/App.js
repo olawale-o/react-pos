@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router-dom';
 
-function App() {
+function App({ socket }) {
   return (
     <div className="App">
-      <Outlet />
+      <Outlet context={[socket]} />
     </div>
   );
 }
