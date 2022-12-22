@@ -1,69 +1,83 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, useOutletContext } from 'react-router-dom';
 import { getUnfollowedUsers } from '../../services/friendService';
+import MyFriends from './MyFriends';
 
-const MyFriends = ({ socket }) => {
+const Friends = () => {
+  const [socket] = useOutletContext();
   const [users, setUsers] = React.useState([]);
-  // const [onlineUsers, setOnlineUsers] = React.useState([]);
+  const [followers, setFollowers] = React.useState([]);
   const userData = JSON.parse(localStorage.getItem('user')).user;
   const [user, setUser] = React.useState({});
-
+  const [messages, setMessages] = React.useState([]);
 
   const checkIfUserExist = React.useCallback(() => {
-    console.log('callback')
     const sessionId = localStorage.getItem('sessionId');
-    if (sessionId && userData) {
+    if (sessionId) {
       socket.auth = {sessionId: sessionId};
       socket.connect();
     }
-  }, [socket, userData])
+  }, [socket])
+
+  // React.useEffect(() => {
+  //   async function getUsers() {
+  //     try {
+  //       const followers = await getUnfollowedUsers(userData.username);
+  //       setUsers(followers)
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  //   getUsers();
+  // }, [userData.username]);
 
   React.useEffect(() => {
-    checkIfUserExist();
-    socket.on('session', ({ sessionId, userId, username }) => {
-      console.log('session', { sessionId, userId, username });
-      socket.auth = { sessionId: sessionId };
-      localStorage.setItem('sessionId', sessionId);
-      setUser({ sessionId, userId, username})
+    socket.on('connect', () => {
+      console.log('connected')
     })
+    checkIfUserExist();
+    return () => {
+      socket.off('connect')
+    }
   }, [socket, checkIfUserExist]);
 
-  React.useEffect(() => {
-    async function getUsers() {
-      try {
-        const data = await getUnfollowedUsers(userData.username);
-        setUsers(data)
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    getUsers();
-  }, [userData.username, socket]);
 
+  React.useEffect(() => {
+    socket.on('session', async({ sessionId, userId, username }) => {
+      if (sessionId && userId && username) {
+        console.log('session', { sessionId, userId, username });
+        socket.auth = { sessionId: sessionId };
+        localStorage.setItem('sessionId', sessionId);
+        setUser({ sessionId, userId, username})
+      }
+    })
+    return () => {
+      socket.off('session')
+    }
+  }, [socket])
+
+  React.useEffect(() => {
+    socket.on("users", async (data) => {
+      setUsers(data)
+    });
+    return () => {
+      socket.off('users')
+    }
+  }, [socket])
   return (
-    <div className="chat-sidebar">
-      <h2>Open Chat</h2>
-      <div>
-        <h4 className="chat-header">Online users</h4>
-        <div className="online-users">
-          {users.map((user) => (
-            <Link to={`${user._id}`} key={user._id} className="link user-link">
-              <p>{user.username}</p>
-              {/* {user._id && (<div className="online-icon" />)} */}
-            </Link>
-          ))}
-        </div>
+    <div className="chat">
+      <MyFriends
+        socket={socket}
+        users={users}
+        setUsers={setUsers}
+        user={user}
+        followers={followers}
+      />
+      <div className="chat-main">
+        {JSON.stringify(user)}
+        {/* <Outlet /> */}
       </div>
     </div>
-  );
-};
-const Friends = ({ socket }) => (
-  <div className="chat">
-    <MyFriends socket={socket} />
-    <div className="chat-main">
-      <Outlet />
-    </div>
-  </div>
-);
+)};
 
 export default Friends;

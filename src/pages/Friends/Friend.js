@@ -8,7 +8,7 @@ export async function loader({ params }) {
 }
 
 const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
-  const currentChat = messages[id];
+  // const currentChat = messages[id];
   return (
     <>
       <header className="chat-main-header">
@@ -16,17 +16,17 @@ const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
       </header>
   
       <div className="message-container">
-        {currentChat?.map((message, i) => 
+        {messages?.map((message, i) => 
           message.senderId === JSON.parse(localStorage.getItem('user')).user._id
           ? (
-            <div className="message-chats" key={message.chatId}>
+            <div className="message-chats" key={message.roomId}>
               <p className="sender-name">You</p>
               <div className="message-sender">
                 <p>{message.text}</p>
               </div>
             </div>
           ) : (
-            <div className="message-chats" key={message.chatId}>
+            <div className="message-chats" key={message.roomId}>
               <p>{message.recipientId}</p>
               <div className="message-recipient">
                 <p>{message.text}</p>
@@ -57,7 +57,7 @@ const ChatFooter = ({ socket, contact }) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       socket.emit('private message',  {
-        chatId: `${JSON.parse(localStorage.getItem('user')).user._id}-${contact._id}`,
+        roomId: `${JSON.parse(localStorage.getItem('user')).user._id}-${contact._id}${socket.id}${Math.random()}`,
         text: message,
         senderId: `${JSON.parse(localStorage.getItem('user')).user._id}`,
         recipientId: contact._id,
@@ -88,7 +88,7 @@ const Friend = ({ socket }) => {
   const userData = JSON.parse(localStorage.getItem('user')).user._id;
   const { contact } = useLoaderData();
   const id = `${userData}-${contact._id}`;
-  const [messages, setMessages] = React.useState({});
+  const [messages, setMessages] = React.useState([]);
   const lastMessageRef = React.useRef(null);
   const [typingStatus, setTypingStatus] = React.useState('');
   React.useEffect(() => {
@@ -101,22 +101,36 @@ const Friend = ({ socket }) => {
   }, [socket]);
   React.useEffect(() => {
     socket.on('private message', (data) => {
-      let newState = {}
-      let oldState = { ...messages };
-      if (id in oldState || id.split("").reverse() in oldState) {
-        const currentChats = [ ...oldState[`${id}`], data.data ];
-        newState = { ...oldState, [`${id}`]: currentChats};
-      } else {
-        newState = { [`${id}`]: [data.data] }
-      }
+      // let newState = {}
+      // let oldState = { ...messages };
+      // if (id in oldState || id.split("").reverse() in oldState) {
+      //   const currentChats = [ ...oldState[`${id}`], data.data ];
+      //   newState = { ...oldState, [`${id}`]: currentChats};
+      // } else {
+      //   newState = { [`${id}`]: [data.data] }
+      // }
+      // if ((data.data.senderId === contact._id && userData === data.data.recipientId)
+      //   || (data.data.recipientId === contact._id && userData === data.data.senderId
+      // )) {
+      //   setMessages(newState);
+      // }
+      const newMessages = [...messages, data.data];
+      localStorage.setItem('chats', JSON.stringify(newMessages));
       if ((data.data.senderId === contact._id && userData === data.data.recipientId)
         || (data.data.recipientId === contact._id && userData === data.data.senderId
       )) {
-        setMessages(newState);
-      }
+        console.log('hey');
+      setMessages(newMessages);
+    }
     });
   }, [socket, messages, id, contact._id, userData]);
   
+  React.useEffect(() => {
+    const conversations = JSON.parse(localStorage.getItem('chats')) || [];
+    const ourConversations = conversations.filter((chat) => (chat.senderId === userData && chat.recipientId === contact._id)
+      || (chat.senderId === contact._id && chat.recipientId === userData))
+    setMessages(ourConversations);
+  }, [userData, contact._id]);
   return (
     <>
       <ChatBody

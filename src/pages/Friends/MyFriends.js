@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const MyFriends = ({ socket, users, setUsers, user }) => {
-  console.log(users);
   const findUser = React.useCallback((userId) => {
     const userIndex = users.findIndex((user) => user.userId === userId);
     return userIndex >= 0;
@@ -16,9 +15,9 @@ const MyFriends = ({ socket, users, setUsers, user }) => {
     }
   },  [users, setUsers]);
 
-  const onUserConnected = React.useCallback((userId, username ) => {
+  const onUserConnected = React.useCallback((userId, username) => {
     if (user.userId !== userId) {
-        const userExists =  findUser(userId);
+        const userExists = findUser(userId);
         if (userExists) {
           handleConnectionStatus(userId, true);
         } else {
@@ -30,18 +29,17 @@ const MyFriends = ({ socket, users, setUsers, user }) => {
 
   const userDisconnected = React.useCallback(({ userId }) => {
     handleConnectionStatus(userId, false)
-  }, [handleConnectionStatus])
-    React.useEffect(() => {
-      socket.on('user connected', ({ userId, username }) => {
-        console.log('user connected')
-       onUserConnected(userId, username)
-      })
+  }, [handleConnectionStatus]);
 
-      socket.on("user disconnected", (user) => {
-        console.log('user disconnected', user)
-        userDisconnected(user)
-      })
-    }, [socket, onUserConnected, userDisconnected])
+  React.useEffect(() => {
+    socket.on('user connected', ({ userId, username }) => {
+      onUserConnected(userId, username)
+    })
+
+    socket.on("user disconnected", (user) => {
+      userDisconnected(user)
+    })
+  }, [socket, onUserConnected, userDisconnected])
     return (
       <div className="chat-sidebar">
         <h2>Open Chat</h2>
