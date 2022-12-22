@@ -16,6 +16,9 @@ import Pending from './pages/User/Pending';
 import Friend, { loader as contactLoader } from './pages/Friends/Friend';
 import FriendList from './pages/Friends/FriendList';
 import Friends from './pages/Friends';
+import Followers from './pages/Followers';
+import FollowerList from './pages/Followers/FollowerList';
+import Follower from './pages/Followers/Follower';
 
 const router = createBrowserRouter([
   {
@@ -40,7 +43,15 @@ const router = createBrowserRouter([
           { index: true, element: <FriendList /> },
           { path: ':id', element: <Friend socket={socket} />, loader: contactLoader }
         ]
-      }
+      },
+      {
+        path: 'followers',
+        element: <Followers />,
+        children: [
+          { index: true, element: <FollowerList /> },
+          { path: ':id', element: <Follower socket={socket} />, loader: contactLoader }
+        ]
+      },
     ]
   },
 ]);
