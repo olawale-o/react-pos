@@ -9,7 +9,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import io from 'socket.io-client';
+import socket from './socket';
 import Home, { action as loginAction, loader as homeLoader } from './pages/Home';
 import FriendSuggest from './pages/User/FriendSuggest';
 import Pending from './pages/User/Pending';
@@ -17,15 +17,12 @@ import Friend, { loader as contactLoader } from './pages/Friends/Friend';
 import FriendList from './pages/Friends/FriendList';
 import Friends from './pages/Friends';
 
-
-const socket = io('http://localhost:4000');
-
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <App socket={socket} />,
     children: [
-      { index: true, element: <Home socket={socket} />, action: loginAction, loader: homeLoader },
+      { index: true, element: <Home />, action: loginAction, loader: homeLoader },
       { path: 'chat', element: <Chat socket={socket} /> },
       {
         path: 'users',
@@ -38,7 +35,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'friends',
-        element: <Friends socket={socket} />,
+        element: <Friends />,
         children: [
           { index: true, element: <FriendList /> },
           { path: ':id', element: <Friend socket={socket} />, loader: contactLoader }
