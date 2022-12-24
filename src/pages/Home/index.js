@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Form, redirect, useLoaderData } from 'react-router-dom';
+import { useNavigate, Form, redirect, useLoaderData, useOutletContext } from 'react-router-dom';
 import { loginService } from '../../services/authService';
 
 export async function loader() {
@@ -14,7 +14,8 @@ export async function action({ request }) {
   return redirect('/');
 }
 
-const Home = ({ socket }) => {
+const Home = () => {
+  const [socket] = useOutletContext();
   const data = useLoaderData();
   const navigate = useNavigate();
   const [userName, setUserName] = React.useState('');
