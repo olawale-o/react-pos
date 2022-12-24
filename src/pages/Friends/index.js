@@ -1,15 +1,46 @@
 import React from 'react';
-import { Outlet, useOutletContext } from 'react-router-dom';
-import { getUnfollowedUsers } from '../../services/friendService';
+import { useOutletContext } from 'react-router-dom';
+import ChatFriend from './ChatFriend';
 import MyFriends from './MyFriends';
 
 const Friends = () => {
   const [socket] = useOutletContext();
   const [users, setUsers] = React.useState([]);
-  const [followers, setFollowers] = React.useState([]);
-  const userData = JSON.parse(localStorage.getItem('user')).user;
   const [user, setUser] = React.useState({});
   const [messages, setMessages] = React.useState([]);
+  const [selectedUser, setSelectedUser] = React.useState({});
+  const selectedCurrentUser = React.useRef({});
+
+  const handleNewMessageStatus = React.useCallback((userId, status) => {
+    const userIndex = users.findIndex((user) => user._id === userId);
+    if (userIndex >= 0) {
+      users[userIndex].hasNewMessage = status;
+      setUsers([...users]);
+    }
+  }, [users, setUsers]);
+
+  const handlePrivateChat = React.useCallback((message) => {
+    console.log(selectedCurrentUser.current);
+    if (selectedCurrentUser.current._id) {
+      if (selectedCurrentUser.current._id === message.from) {
+        const newMessage = {
+          userId: message.from,
+          text: message.text,
+          username: message.username,
+          _id: message.from,
+          from: message.from,
+          to: message.to
+        }
+        setMessages([...messages, newMessage]);
+        // handleNewMessageStatus(message.from, false)
+      } else {
+        console.log('not equal');
+        handleNewMessageStatus(message.from, true)
+      }
+    } else {
+      handleNewMessageStatus(message.from, true)
+    }
+  }, [handleNewMessageStatus, messages, selectedCurrentUser])
 
   const checkIfUserExist = React.useCallback(() => {
     const sessionId = localStorage.getItem('sessionId');
@@ -19,17 +50,15 @@ const Friends = () => {
     }
   }, [socket])
 
-  // React.useEffect(() => {
-  //   async function getUsers() {
-  //     try {
-  //       const followers = await getUnfollowedUsers(userData.username);
-  //       setUsers(followers)
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  //   getUsers();
-  // }, [userData.username]);
+  const userMessages = React.useCallback(({ messages }) => {
+    console.log('chatMessages', messages);
+    const chatMessages = [];
+    messages.forEach(({ text, from, to, username }) => {
+      chatMessages.push({ to, from, text, username })
+    })
+    setMessages([...chatMessages])
+  }, []);
+
 
   React.useEffect(() => {
     socket.on('connect', () => {
@@ -48,7 +77,7 @@ const Friends = () => {
         console.log('session', { sessionId, userId, username });
         socket.auth = { sessionId: sessionId };
         localStorage.setItem('sessionId', sessionId);
-        setUser({ sessionId, userId, username})
+        setUser({ sessionId, _id: userId, username})
       }
     })
     return () => {
@@ -63,7 +92,26 @@ const Friends = () => {
     return () => {
       socket.off('users')
     }
-  }, [socket])
+  }, [socket]);
+
+
+  React.useEffect(() => {
+    socket.on('private message', (message) => handlePrivateChat(message));
+  }, [socket, handlePrivateChat]);
+
+  React.useEffect(() => {
+    socket.on('user messages', (messages) => userMessages(messages));
+  }, [socket, userMessages]);
+
+  const onUserSelected = async (user) => {
+    console.log('user selected', user);
+    setSelectedUser(user);
+    setMessages([]);
+    selectedCurrentUser.current = user;
+    await socket.emit('user messages', user);
+    handleNewMessageStatus(user._id, false)
+  };
+  
   return (
     <div className="chat">
       <MyFriends
@@ -71,11 +119,17 @@ const Friends = () => {
         users={users}
         setUsers={setUsers}
         user={user}
-        followers={followers}
+        setSelectedUser={onUserSelected}
+        selectedCurrentUser={selectedCurrentUser}
       />
       <div className="chat-main">
-        {JSON.stringify(user)}
-        {/* <Outlet /> */}
+        {selectedUser._id ? (<ChatFriend
+          socket={socket}
+          selectedUser={selectedUser}
+          messages={messages}
+          setMessages={setMessages}
+        />) : (<p>Select a user to chat with</p>)}
+        {/* <Outlet context={[socket, users, setUsers]} /> */}
       </div>
     </div>
 )};

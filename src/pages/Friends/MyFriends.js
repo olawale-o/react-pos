@@ -1,14 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
-const MyFriends = ({ socket, users, setUsers, user }) => {
+const MyFriends = ({ socket, users, setUsers, user, setSelectedUser }) => {
   const findUser = React.useCallback((userId) => {
-    const userIndex = users.findIndex((user) => user.userId === userId);
+    const userIndex = users.findIndex((user) => user._id === userId);
     return userIndex >= 0;
   }, [users]);
 
   const handleConnectionStatus = React.useCallback((userId, status) => {
-    const userIndex = users.findIndex((u) => u.userId === userId);
+    const userIndex = users.findIndex((u) => u._id === userId);
     if (userIndex >= 0) {
       users[userIndex].connected = status;
       setUsers([...users])
@@ -16,16 +15,16 @@ const MyFriends = ({ socket, users, setUsers, user }) => {
   },  [users, setUsers]);
 
   const onUserConnected = React.useCallback((userId, username) => {
-    if (user.userId !== userId) {
+    if (user._id !== userId) {
         const userExists = findUser(userId);
         if (userExists) {
           handleConnectionStatus(userId, true);
         } else {
-          const newUser = { userId, username, connected: true };
+          const newUser = { _id: userId, userId: userId, username, connected: true };
           setUsers([...users, newUser])
         }
     }
-  }, [findUser,setUsers, users, user.userId, handleConnectionStatus]);
+  }, [findUser,setUsers, users, user._id, handleConnectionStatus]);
 
   const userDisconnected = React.useCallback(({ userId }) => {
     handleConnectionStatus(userId, false)
@@ -47,10 +46,11 @@ const MyFriends = ({ socket, users, setUsers, user }) => {
           <h4 className="chat-header">Online users</h4>
           <div className="online-users">
             {users.map((user, i) => (
-              <Link to={`${user.userId}`} key={i} className="link user-link">
+              <button onClick={() => setSelectedUser(user)} key={i} className="link user-link">
                 <p>{user.username}</p>
+                {user.hasNewMessage && (<span>1</span>)}
                 {user.connected && (<div className="online-icon" />)}
-              </Link>
+              </button>
             ))}
           </div>
         </div>
