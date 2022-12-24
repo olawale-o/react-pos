@@ -46,7 +46,7 @@ li {
   align-items: center;
 }
 .chat-sidebar {
-  height: 100%;
+  height: calc(100vh + 20%);
   background-color: #f9f5eb;
   flex: 0.2;
   padding: 20px;
