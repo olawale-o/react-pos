@@ -1,6 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700;800&display=swap');
+*,
+*::after,
+*::before{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 .App {
-  height: calc(100vh - 20%);
-  /* background: #F7F7F7; */
+  /* height: calc(100vh + 50px); */
+  font-family: 'Open Sans';
 }
 
 .login_container {
@@ -52,8 +61,137 @@
   padding-inline: 5px;
 }
 
-
 .btn_login {
   width: 20%;
   padding: 18px;
+}
+
+.chat {
+  width: 100%;
+  /* height: calc(100vh + 20px); */
+  /* background-color: yellow; */
+}
+
+.chatsidebar {
+  width: 400px;
+  height: 100%;
+  background-color: #f7f7f7;
+  padding: 26px;
+}
+
+.chatsidebard-header {
+  width: 100%;
+  margin-bottom: 19px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.icon svg {
+  color: #c4c4c4;
+  font-size: 23px;
+}
+
+.img-container {
+  width: 150px;
+  height: 150px;
+  border-radius: 100%;
+  background-color:#EDEEF0;
+  margin-bottom: 20px;
+}
+
+.profile-name {
+  font-size: 25px;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.search {
+  width: 100%;
+  background: #EDEEF0;
+  height: 47px;
+  position: relative;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.search-input {
+  height: 100%;
+  width: 90%;
+  background-color: #EDEEF0;
+  outline: none;
+  border: none;
+  color: #B3B7BE;
+  font-size: 18px;
+}
+
+.search .icon {
+  position: absolute;
+  right: 0;
+  width: 10%;
+}
+
+.contact-item {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.contact-button {
+  all: unset;
+  width: 100%;
+}
+
+.contact {
+  display: flex;
+}
+
+.avatar-container {
+  width: 69px;
+  height: 69px;
+  background-color: #B3B7BE;
+  border-radius: 10px;
+  margin-right: 21px;
+}
+
+.last-message {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.last-message .text {
+  font-weight: 300;
+}
+
+.chat-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 41px;
+  font-weight: 300;
+}
+
+.online-state {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.online {
+  background: linear-gradient(0deg, #82EC2E, #82EC2E), #ECC22E;
+}
+
+.offline {
+  background: #EC732E;
+}
+
+.idle {
+  background: linear-gradient(0deg, #ECC22E, #ECC22E), #ECC22E;
 }
