@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Form, redirect, useLoaderData, useOutletContext } from 'react-router-dom';
-import { loginService } from '../../services/authService';
+import { registerService } from '../../services/authService';
 
 export async function loader() {
   return JSON.parse(localStorage.getItem('user'));
@@ -9,21 +9,25 @@ export async function loader() {
 export async function action({ request }) {
   const formData = await request.formData();
   const formDataEntries = Object.fromEntries(formData);
-  const data = await loginService({
+  const data = await registerService({
     username: formDataEntries.username,
     password: formDataEntries.password,
+    email: formDataEntries.email,
+    fullname: formDataEntries.fullname,
   });
   localStorage.setItem('user', JSON.stringify(data));
   return redirect('/');
 }
 
-const Home = () => {
+const Register = () => {
   const [socket] = useOutletContext();
   const data = useLoaderData();
   const navigate = useNavigate();
   const [formValues, setFormValues] = React.useState({
     username: '',
     password: '',
+    email: '',
+    fullname: '',
   });
 
   React.useEffect(() => {    
@@ -42,17 +46,31 @@ const Home = () => {
   return (
     <div className="container login_container">
       <div className="login_container-header">
-        <h2 className="heading heading_2">Log in</h2>
-          <span>or register</span>
+        <h2 className="heading heading_2">Register</h2>
+          <span>or Login</span>
         </div>
       <Form method="post" className="form login_form">
         <div className="login_form-content">
+          <input
+            name="email"
+            className="input"
+            value={formValues.email}
+            onChange={onFormChange}
+            placeholder="Email"
+          />
           <input
             name="username"
             className="input"
             value={formValues.username}
             onChange={onFormChange}
-            placeholder="Email or username"
+            placeholder="Username"
+          />
+          <input
+            name="fullname"
+            className="input"
+            value={formValues.fullname}
+            onChange={onFormChange}
+            placeholder="Full name"
           />
           <input
             name="password"
@@ -61,11 +79,11 @@ const Home = () => {
             onChange={onFormChange}
             placeholder="Password"
           />
-          <button type="submit" className="btn btn_login">Log in</button>
+          <button type="submit" className="btn btn_login">Create</button>
         </div>
       </Form>
     </div>
   )
 }
 
-export default Home;
+export default Register;
