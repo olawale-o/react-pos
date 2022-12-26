@@ -1,5 +1,5 @@
 import React from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useOutletContext } from "react-router";
 import { getContactService } from "../../services/friendService";
 
 export async function loader({ params }) {
@@ -7,8 +7,7 @@ export async function loader({ params }) {
   return { contact };
 }
 
-const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
-  // const currentChat = messages[id];
+const ChatBody = ({ contact, messages, lastMessageRef, typingStatus }) => {
   return (
     <>
       <header className="chat-main-header">
@@ -17,17 +16,17 @@ const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
   
       <div className="message-container">
         {messages?.map((message, i) => 
-          message.senderId === JSON.parse(localStorage.getItem('user')).user._id
+          message.username === JSON.parse(localStorage.getItem('user')).user.username
           ? (
-            <div className="message-chats" key={message.roomId}>
+            <div className="message-chats" key={i}>
               <p className="sender-name">You</p>
               <div className="message-sender">
                 <p>{message.text}</p>
               </div>
             </div>
           ) : (
-            <div className="message-chats" key={message.roomId}>
-              <p>{message.recipientId}</p>
+            <div className="message-chats" key={i}>
+              <p>{message.username}</p>
               <div className="message-recipient">
                 <p>{message.text}</p>
               </div>
@@ -43,7 +42,7 @@ const ChatBody = ({ contact, messages, lastMessageRef, typingStatus, id }) => {
   )
 };
 
-const ChatFooter = ({ socket, contact }) => {
+const ChatFooter = ({ socket, contact, messages, setMessages, user }) => {
     let timeout  = setTimeout(function(){}, 0);
     const [message, setMessage] = React.useState('');
     const handleTyping = () => {
@@ -56,15 +55,16 @@ const ChatFooter = ({ socket, contact }) => {
   
     const handleSubmit = async (e) => {
       e.preventDefault();
-      socket.emit('private message',  {
-        roomId: `${JSON.parse(localStorage.getItem('user')).user._id}-${contact._id}${socket.id}${Math.random()}`,
+      const newMessage = {
+        userId: user._id,
+        username: user.username,
         text: message,
-        senderId: `${JSON.parse(localStorage.getItem('user')).user._id}`,
-        recipientId: contact._id,
-        socketID: socket.id,
-        recipientSocketId: contact.socketId,
-        senderSocketId: socket.id
+      }
+      socket.emit('private message', {
+        text: message,
+        to: contact._id
       });
+      setMessages([...messages, newMessage])
       setMessage('');
     }
     return (
@@ -84,13 +84,32 @@ const ChatFooter = ({ socket, contact }) => {
     )
 };
   
-const Friend = ({ socket }) => {
-  const userData = JSON.parse(localStorage.getItem('user')).user._id;
+const Friend = () => {
+  const [socket, users, setUsers] = useOutletContext();
+  const userData = JSON.parse(localStorage.getItem('user')).user;
   const { contact } = useLoaderData();
-  const id = `${userData}-${contact._id}`;
   const [messages, setMessages] = React.useState([]);
   const lastMessageRef = React.useRef(null);
   const [typingStatus, setTypingStatus] = React.useState('');
+  const handleNewMessage = React.useCallback((userId, status) => {
+    const userIndex = users.findIndex((user) => user._id === userId);
+    if (userIndex >= 0) {
+      users[userIndex].hasNewMessage = status;
+      setUsers([...users]);
+    }
+  }, [users, setUsers]);
+  const handleNewMessageStatus = React.useCallback((userId, status) => {
+    const userIndex = users.findIndex((user) => user._id === userId);
+    if (userIndex >= 0) {
+      users[userIndex].hasNewMessage = status;
+      setUsers([...users]);
+    }
+  }, [users, setUsers]);
+  React.useEffect(() => {
+    setMessages([]);
+    handleNewMessage(contact._id, false);
+  }, [contact._id, handleNewMessage]);
+
   React.useEffect(() => {
     lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -100,37 +119,20 @@ const Friend = ({ socket }) => {
     socket.on('doneTypingResponse' , (data) => setTypingStatus(data));
   }, [socket]);
   React.useEffect(() => {
-    socket.on('private message', (data) => {
-      // let newState = {}
-      // let oldState = { ...messages };
-      // if (id in oldState || id.split("").reverse() in oldState) {
-      //   const currentChats = [ ...oldState[`${id}`], data.data ];
-      //   newState = { ...oldState, [`${id}`]: currentChats};
-      // } else {
-      //   newState = { [`${id}`]: [data.data] }
-      // }
-      // if ((data.data.senderId === contact._id && userData === data.data.recipientId)
-      //   || (data.data.recipientId === contact._id && userData === data.data.senderId
-      // )) {
-      //   setMessages(newState);
-      // }
-      const newMessages = [...messages, data.data];
-      localStorage.setItem('chats', JSON.stringify(newMessages));
-      if ((data.data.senderId === contact._id && userData === data.data.recipientId)
-        || (data.data.recipientId === contact._id && userData === data.data.senderId
-      )) {
-        console.log('hey');
-      setMessages(newMessages);
-    }
+    socket.on('private message', (message) => {
+      if (contact._id === message.from) {
+        const newMessage = {
+          userId: message.from,
+          text: message.text,
+          username: message.username
+        }
+        setMessages([...messages, newMessage]);
+      } else {
+        handleNewMessageStatus(message.from, true)
+      }
     });
-  }, [socket, messages, id, contact._id, userData]);
+  }, [socket, messages, contact._id, userData, handleNewMessageStatus]);
   
-  React.useEffect(() => {
-    const conversations = JSON.parse(localStorage.getItem('chats')) || [];
-    const ourConversations = conversations.filter((chat) => (chat.senderId === userData && chat.recipientId === contact._id)
-      || (chat.senderId === contact._id && chat.recipientId === userData))
-    setMessages(ourConversations);
-  }, [userData, contact._id]);
   return (
     <>
       <ChatBody
@@ -138,9 +140,14 @@ const Friend = ({ socket }) => {
         lastMessageRef={lastMessageRef}
         typingStatus={typingStatus}
         contact={contact}
-        id={id}
       />
-      <ChatFooter socket={socket} contact={contact}  />
+      <ChatFooter
+        socket={socket}
+        contact={contact}
+        messages={messages}
+        setMessages={setMessages}
+        user={userData}
+      />
     </>
   );
 };

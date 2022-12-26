@@ -1,7 +1,7 @@
 import React from "react";
 import { getPendingFriendRequest, acceptFriendRequestService } from "../../services/friendService";
 
-const Pending = () => {
+const Pending = ({ socket }) => {
   const userData = JSON.parse(localStorage.getItem('user'))?.user;
   const [users, setUsers] = React.useState([]);
   React.useEffect(() => {
