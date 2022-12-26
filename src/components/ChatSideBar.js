@@ -1,4 +1,5 @@
 import { BiCog, BiChevronRightSquare, BiSearch } from "react-icons/bi";
+import Contacts from "./Contacts";
 
 const ChatSideBarHeader = () => {
   return (
@@ -27,6 +28,7 @@ const ChatSideBar = () => {
   return (
     <div className="chatsidebar">
       <ChatSideBarHeader />
+      <Contacts />
     </div>
   )
 };
