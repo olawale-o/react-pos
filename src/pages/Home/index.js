@@ -9,7 +9,10 @@ export async function loader() {
 export async function action({ request }) {
   const formData = await request.formData();
   const formDataEntries = Object.fromEntries(formData);
-  const data = await loginService({ username: formDataEntries.username });
+  const data = await loginService({
+    username: formDataEntries.username,
+    password: formDataEntries.password,
+  });
   localStorage.setItem('user', JSON.stringify(data));
   return redirect('/');
 }
@@ -18,7 +21,10 @@ const Home = () => {
   const [socket] = useOutletContext();
   const data = useLoaderData();
   const navigate = useNavigate();
-  const [userName, setUserName] = React.useState('');
+  const [formValues, setFormValues] = React.useState({
+    username: '',
+    password: '',
+  });
 
   React.useEffect(() => {    
     if (data !== null) {
@@ -28,17 +34,34 @@ const Home = () => {
     }
   }, [data, navigate, socket]);
 
+  const onFormChange = (e) => {
+    setFormValues({ ...formValues, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div>
-      <Form method="post" className="home-container">
-        <h2 className="home-header">Log in</h2>
-        <input
-          name="username"
-          className="input"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        />
-        <button type="submit" className="home-cta">Log in</button>
+    <div className="container login_container">
+      <div className="login_container-header">
+        <h2 className="heading heading_2">Log in</h2>
+          <span>or register</span>
+        </div>
+      <Form method="post" className="form login_form">
+        <div className="login_form-content">
+          <input
+            name="username"
+            className="input"
+            value={formValues.username}
+            onChange={onFormChange}
+            placeholder="Email or username"
+          />
+          <input
+            name="password"
+            className="input"
+            value={formValues.password}
+            onChange={onFormChange}
+            placeholder="Password"
+          />
+          <button type="submit" className="btn btn_login">Log in</button>
+        </div>
       </Form>
     </div>
   )
