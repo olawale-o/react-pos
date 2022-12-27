@@ -28,7 +28,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home />, action: loginAction, loader: homeLoader },
       { path: 'register', element: <Register />, action: loginAction, loader: homeLoader },
-      { path: 'chat', element: <Chat socket={socket} /> },
+      { path: 'chat', element: <Chat /> },
       {
         path: 'users',
         element: <User />,
