@@ -35,7 +35,7 @@ const Register = () => {
       const { user: { username, _id, name } } = data;
       socket.auth = { user: { username, _id, name } }
       socket.connect();
-      navigate('/friends');
+      navigate('/chat');
     }
   }, [data, navigate, socket]);
 
