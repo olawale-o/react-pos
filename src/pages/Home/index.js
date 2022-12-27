@@ -48,6 +48,7 @@ const Home = () => {
       <Form method="post" className="form login_form">
         <div className="login_form-content">
           <input
+            type="text"
             name="username"
             className="input"
             value={formValues.username}
@@ -55,6 +56,7 @@ const Home = () => {
             placeholder="Email or username"
           />
           <input
+            type="password"
             name="password"
             className="input"
             value={formValues.password}

@@ -52,6 +52,7 @@ const Register = () => {
       <Form method="post" className="form login_form">
         <div className="login_form-content">
           <input
+            type="email"
             name="email"
             className="input"
             value={formValues.email}
@@ -59,6 +60,7 @@ const Register = () => {
             placeholder="Email"
           />
           <input
+            type="text"
             name="username"
             className="input"
             value={formValues.username}
@@ -66,6 +68,7 @@ const Register = () => {
             placeholder="Username"
           />
           <input
+            type="text"
             name="fullname"
             className="input"
             value={formValues.fullname}
@@ -73,6 +76,7 @@ const Register = () => {
             placeholder="Full name"
           />
           <input
+            type="password"
             name="password"
             className="input"
             value={formValues.password}
