@@ -4,6 +4,7 @@ import ChatSideBar from "../../components/ChatSideBar";
 import ChatArea from "../../components/ChatArea";
 
 const Chat = () => {
+  // console.log(JSON.parse(localStorage.getItem('user')));
   const [socket] = useOutletContext();
   const [users, setUsers] = React.useState([]);
   const [user, setUser] = React.useState({});
@@ -106,7 +107,12 @@ const Chat = () => {
       <div className="chat-area">
         {
           selectedUser._id ?
-          (<ChatArea />)
+          (<ChatArea
+            socket={socket}
+            selectedUser={selectedUser}
+            messages={messages}
+            setMessages={setMessages}
+          />)
            :
           (<div>Please select a user to chat with</div>)
         }

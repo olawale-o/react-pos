@@ -231,12 +231,30 @@ body {
 .chat-message-container {
   display: flex;
   height: 100%;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.chat-recipient {
+  margin-right: auto;
+  /* background-color: rebeccapurple; */
+}
+
+.chat-sender {
+  margin-left: auto;
+  /* background-color: green; */
+  flex-direction: row-reverse;
+}
+
+.chat-sender .avatar-container {
+  margin-right: 0;
 }
 
 .message-area {
   display: flex;
   width: 60%;
   align-items: flex-start;
+  flex-direction: row-reverse;
   /* justify-content: space-between; */
 }
 
@@ -246,6 +264,7 @@ body {
   flex-direction: column;
   justify-content: space-between;
   flex: 3;
+  /* background-color: red; */
 }
 
 .chat-message {

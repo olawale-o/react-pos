@@ -1,15 +1,52 @@
+import React from 'react';
 import { BiPaperclip, BiSend } from 'react-icons/bi'
 
-const ChatInput = () => {
+const ChatInput = ({ socket, contact, messages, setMessages, user }) => {
+  let timeout  = setTimeout(function(){}, 0);
+  const [message, setMessage] = React.useState('');
+  const handleTyping = () => {
+    clearTimeout(timeout);
+    socket.emit('typing', `${JSON.parse(localStorage.getItem('user')).user.username} is typing`);
+    timeout = setTimeout(() => {
+      socket.emit('doneTyping', '')
+    }, 5000)
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newMessage = {
+      userId: user._id,
+      username: user.username,
+      text: message,
+      _id: user._id,
+      to: contact._id,
+      from: user._id,
+    }
+    socket.emit('private message', {
+      text: message,
+      to: contact._id
+    });
+    setMessages([...messages, newMessage])
+    setMessage('');
+  }
   return (
     <div className="chat-input-container">
       <div className="chat-input-content">
-        <input type="text" className="chat-input" placeholder="write your message" />
+        <input
+          type="text"
+          className="chat-input"
+          placeholder={`Write ${contact.username} a message`}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
         <div className="utils">
           <button className="clip">
             <BiPaperclip />
           </button>
-          <button className="send">
+          <button
+            className="send"
+            onClick={handleSubmit}
+          >
             <BiSend />
           </button>
         </div>
@@ -18,41 +55,89 @@ const ChatInput = () => {
   )
 };
 
-const ChatMessage = () => {
+const ChatMessage = ({
+  messages
+}) => {
   return (
-    <div className="chat-message-container">
-      <div className="avatar-container" />
-      <div className="message-area">
-        <div className="chat-message-content">
-          <span className="chat-profile-name">Profile name</span>
-          <p className="chat-message text-sm">
-            is simply dummy text of the printing and typesetting industry.
-            Lorem Ipsum has been the industry's standard dummy text ever since
-          </p>
-        </div>
-        <div className="chat-message-timestamp">
-          <span className="timestamp text-sm">16:45</span>
-          <div className="online-state online small-circle" />
-        </div>
-      </div>
+    <div>
+      {
+        messages?.map((message) => (
+          message.from === JSON.parse(localStorage.getItem('user')).user._id ? (
+            <div className="chat-message-container chat-sender">
+              <div className="avatar-container" />
+              <div className="message-area">
+                <div className="chat-message-content">
+                  <span className="chat-profile-name">You</span>
+                  <p className="chat-message text-sm">{message.text}</p>
+                </div>
+                <div className="chat-message-timestamp">
+                  <span className="timestamp text-sm">16:45</span>
+                  <div className="online-state online small-circle" />
+                </div>
+              </div>
+            </div>) : (
+              <div className="chat-message-container chat-recipient">
+                <div className="avatar-container" />
+                  <div className="message-area">
+                    <div className="chat-message-content">
+                      <span className="chat-profile-name">{message.username}</span>
+                      <p className="chat-message text-sm">{message.text}</p>
+                    </div>
+                  <div className="chat-message-timestamp">
+                    <span className="timestamp text-sm">16:45</span>
+                    <div className="online-state online small-circle" />
+                  </div>
+                </div>
+              </div>
+            )
+        ))
+      }
     </div>
   )
 };
 
-const ChatBody = () => {
+const ChatBody = ({ messages }) => {
  return (
     <div className="chat-body">
-      <ChatMessage />
+      <ChatMessage messages={messages} />
     </div>
  )
 };
 
 
-const ChatArea = () => {
+const ChatArea = ({
+  socket,
+  messages,
+  setMessages,
+  selectedUser,
+}) => {
+  const userData = JSON.parse(localStorage.getItem('user')).user;
+  const lastMessageRef = React.useRef(null);
+  const [typingStatus, setTypingStatus] = React.useState('');
+
+  React.useEffect(() => {
+    lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  React.useEffect(() => {
+    socket.on('typingResponse' , (data) => setTypingStatus(data));
+    socket.on('doneTypingResponse' , (data) => setTypingStatus(data));
+  }, [socket]);
   return (
     <div>
-      <ChatBody />
-      <ChatInput />
+      <ChatBody
+        messages={messages}
+        astMessageRef={lastMessageRef}
+        typingStatus={typingStatus}
+        contact={selectedUser}
+      />
+      <ChatInput
+        socket={socket}
+        contact={selectedUser}
+        messages={messages}
+        setMessages={setMessages}
+        user={userData}
+      />
     </div>
   )
 };

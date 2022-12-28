@@ -2,7 +2,7 @@ import React from "react";
 import { BiCog, BiChevronRightSquare, BiSearch } from "react-icons/bi";
 import Contacts from "./Contacts";
 
-const ChatSideBarHeader = () => {
+const ChatSideBarHeader = ({ user }) => {
   return (
     <div className="chatsidebard-header">
       <div className="header-nav">
@@ -14,7 +14,7 @@ const ChatSideBarHeader = () => {
         </span>
       </div>
       <div className="img-container" />
-      <span className="profile-name">Profile name</span>
+      <span className="profile-name">{user.username}</span>
       <div className="search">
         <input className="search-input" type="text" placeholder="Search" />
         <span className="icon">
@@ -66,7 +66,7 @@ const ChatSideBar = ({ socket, users, setUsers, user, setSelectedUser }) => {
   }, [socket, onUserConnected, userDisconnected])
   return (
     <div className="chatsidebar">
-      <ChatSideBarHeader />
+      <ChatSideBarHeader user={user} />
       <Contacts
         users={users}
         setSelectedUser={setSelectedUser}
