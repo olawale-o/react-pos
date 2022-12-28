@@ -50,7 +50,7 @@ const ChatBody = () => {
 
 const ChatArea = () => {
   return (
-    <div className="chat-area">
+    <div>
       <ChatBody />
       <ChatInput />
     </div>

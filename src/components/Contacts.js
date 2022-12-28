@@ -1,11 +1,14 @@
-const Contact = () => {
+const Contact = ({
+  user,
+  setSelectedUser,
+}) => {
   return (
     <li className="contact-item">
-      <button className="contact-button">
+      <button className="contact-button" onClick={() => setSelectedUser(user)}>
         <div className="contact">
           <div className="avatar-container" />
           <div className="last-message">
-            <span>Profile name</span>
+            <span>{user.username}</span>
             <span className="text">text</span>
           </div>
           <div className="chat-state">
@@ -18,12 +21,16 @@ const Contact = () => {
   )
 }
 
-const Contacts = () => {
+const Contacts = ({ users, setSelectedUser }) => {
   return (
     <ul className="contacts">
-      {Array.from([1,2,3,4,5,6]).map((i) =>{
+      {users.map((user,i) =>{
         return (
-          <Contact />
+          <Contact
+            key={i}
+            user={user}
+            setSelectedUser={setSelectedUser}
+          />
         )
       })}
     </ul>
