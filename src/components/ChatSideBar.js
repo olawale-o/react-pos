@@ -70,6 +70,9 @@ const ChatSideBar = ({ socket, users, setUsers, user, setSelectedUser }) => {
       <Contacts
         users={users}
         setSelectedUser={setSelectedUser}
+        user={user}
+        setUsers={setUsers}
+        socket={socket}
       />
     </div>
   )

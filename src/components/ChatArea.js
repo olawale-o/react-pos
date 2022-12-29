@@ -61,9 +61,9 @@ const ChatMessage = ({
   return (
     <div>
       {
-        messages?.map((message) => (
+        messages?.map((message, i) => (
           message.from === JSON.parse(localStorage.getItem('user')).user._id ? (
-            <div className="chat-message-container chat-sender">
+            <div className="chat-message-container chat-sender" key={i}>
               <div className="avatar-container" />
               <div className="message-area">
                 <div className="chat-message-content">
@@ -76,7 +76,7 @@ const ChatMessage = ({
                 </div>
               </div>
             </div>) : (
-              <div className="chat-message-container chat-recipient">
+              <div className="chat-message-container chat-recipient" key={i}>
                 <div className="avatar-container" />
                   <div className="message-area">
                     <div className="chat-message-content">
