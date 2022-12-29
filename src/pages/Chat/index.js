@@ -5,13 +5,13 @@ import ChatArea from "../../components/ChatArea";
 import { getUnfollowedUsers } from '../../services/friendService';
 
 const Chat = () => {
-  // const userData = JSON.parse(localStorage.getItem('user')).user;
   const [socket] = useOutletContext();
   const [users, setUsers] = React.useState([]);
   const [user, setUser] = React.useState({});
   const [messages, setMessages] = React.useState([]);
   const [selectedUser, setSelectedUser] = React.useState({});
   const selectedCurrentUser = React.useRef({});
+  const [onlineUsers, setOnlineUsers] = React.useState({});
 
   const handleNewMessageStatus = React.useCallback((userId, status) => {
     const userIndex = users.findIndex((user) => user._id === userId);
@@ -82,7 +82,12 @@ const Chat = () => {
     });
 
     socket.on("users", (data) => {
-      setUsers(data)
+      const list = {};
+      for (let user of data) {
+        list[`${user._id}`] = user;
+      }
+      // setUsers(data);
+      setOnlineUsers(list);
     });
     socket.on('private message', (message) => {
       console.log('private message')
@@ -114,6 +119,8 @@ const Chat = () => {
         user={user}
         setSelectedUser={onUserSelected}
         selectedCurrentUser={selectedCurrentUser}
+        onlineUsers={onlineUsers}
+        setOnlineUsers={setOnlineUsers}
       />
       <div className="chat-area">
         {
