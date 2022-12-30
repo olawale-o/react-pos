@@ -201,7 +201,7 @@ body {
   background: linear-gradient(0deg, #82EC2E, #82EC2E), #ECC22E;
 }
 
-.offline {
+.busy {
   background: #EC732E;
 }
 
@@ -360,4 +360,17 @@ body {
   color: #f7f7f7;
   cursor: pointer;
   font-size: 20px;
+}
+
+.username-container {
+  display: flex;
+  align-items: center;
+}
+
+.new-message {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: blue;
+  margin-left: 5px;
 }
