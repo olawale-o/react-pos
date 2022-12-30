@@ -25,60 +25,40 @@ const ChatSideBarHeader = ({ user }) => {
   );
 };
 
-const ChatSideBar = ({ socket, users, setUsers, user, setSelectedUser, onlineUsers, setOnlineUsers }) => {
-  // const findUser = React.useCallback((userId) => {
-  //   const userIndex = users.findIndex((user) => user._id === userId);
-  //   return userIndex >= 0;
-  // }, [users]);
+const ChatSideBar = ({ socket, user, setSelectedUser, onlineUsers, setOnlineUsers }) => {
   const findUser = React.useCallback((userId) => {
     const user = onlineUsers[userId];
-    console.log('user connect', user);
     return user
   }, [onlineUsers]);
 
-  // const handleConnectionStatus = React.useCallback((userId, status) => {
-  //   // const user = onlineUsers[userId];
-  //   // user.online = status;
-  //   const userIndex = users.findIndex((u) => u._id === userId);
-  //   if (userIndex >= 0) {
-  //     users[userIndex].online = status;
-  //     setUsers([...users])
-  //   }
-
-  //   // setOnlineUsers({ ...onlineUsers });
-  // },  [users, setUsers]);
   const handleConnectionStatus = React.useCallback((userId, status) => {
-    const user = onlineUsers[userId];
-    user.online = status;
+  
+    const userExists = findUser(userId);
+    if (userExists) {
+      user.online = status;
+      setOnlineUsers({ ...onlineUsers });
+    }
 
-    setOnlineUsers({ ...onlineUsers });
-  },  [onlineUsers, setOnlineUsers]);
+  },  [setOnlineUsers, findUser, user, onlineUsers]);
 
-  // const onUserConnected = React.useCallback((userId, username) => {
-  //   if (user._id !== userId) {
-  //       const userExists = findUser(userId);
-  //       if (userExists) {
-  //         handleConnectionStatus(userId, true);
-  //       } else {
-  //         const newUser = { _id: userId, userId: userId, username, online: true };
-
-  //         setUsers(...users, newUser)
-  //       }
-  //   }
-  // }, [findUser,setUsers, users, user._id, handleConnectionStatus]);
   const onUserConnected = React.useCallback((userId, username) => {
+    console.log('on user connected');
     if (user._id !== userId) {
         const userExists = findUser(userId);
         if (userExists) {
+          console.log('userExists', userExists);
           handleConnectionStatus(userId, true);
         } else {
-          const newUser = { _id: userId, userId: userId, username, online: true };
-          onlineUsers[userId] = newUser
-
-          setOnlineUsers({...onlineUsers});
+          console.log('user does not exist');
+          console.log(onlineUsers);
+          const newUser = onlineUsers[userId];
+          if (newUser) {
+            newUser.online = true;
+            setOnlineUsers({ ...onlineUsers });
+          }
         }
     }
-  }, [findUser,setOnlineUsers, onlineUsers, user._id, handleConnectionStatus]);
+  }, [handleConnectionStatus, findUser, onlineUsers, setOnlineUsers, user._id]);
 
   const userDisconnected = React.useCallback(({ userId }) => {
     handleConnectionStatus(userId, false)
@@ -86,10 +66,12 @@ const ChatSideBar = ({ socket, users, setUsers, user, setSelectedUser, onlineUse
 
   React.useEffect(() => {
     socket.on('user connected', ({ userId, username }) => {
+      console.log('user connected', userId, username)
       onUserConnected(userId, username)
     })
 
     socket.on("user disconnected", (user) => {
+      console.log(user, 'disconnected')
       userDisconnected(user)
     })
   }, [socket, onUserConnected, userDisconnected])
@@ -97,10 +79,8 @@ const ChatSideBar = ({ socket, users, setUsers, user, setSelectedUser, onlineUse
     <div className="chatsidebar">
       <ChatSideBarHeader user={user} />
       <Contacts
-        users={users}
         setSelectedUser={setSelectedUser}
         user={user}
-        setUsers={setUsers}
         socket={socket}
         onlineUsers={onlineUsers}
         setOnlineUsers={setOnlineUsers}

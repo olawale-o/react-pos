@@ -104,7 +104,6 @@ const ChatBody = ({ messages }) => {
  )
 };
 
-
 const ChatArea = ({
   socket,
   messages,
@@ -127,7 +126,7 @@ const ChatArea = ({
     <div>
       <ChatBody
         messages={messages}
-        astMessageRef={lastMessageRef}
+        lastMessageRef={lastMessageRef}
         typingStatus={typingStatus}
         contact={selectedUser}
       />

@@ -6,7 +6,6 @@ import { getUnfollowedUsers } from '../../services/friendService';
 
 const Chat = () => {
   const [socket] = useOutletContext();
-  const [users, setUsers] = React.useState([]);
   const [user, setUser] = React.useState({});
   const [messages, setMessages] = React.useState([]);
   const [selectedUser, setSelectedUser] = React.useState({});
@@ -14,12 +13,11 @@ const Chat = () => {
   const [onlineUsers, setOnlineUsers] = React.useState({});
 
   const handleNewMessageStatus = React.useCallback((userId, status) => {
-    const userIndex = users.findIndex((user) => user._id === userId);
-    if (userIndex >= 0) {
-      users[userIndex].hasNewMessage = status;
-      setUsers([...users]);
-    }
-  }, [users, setUsers]);
+    const user = onlineUsers[userId]
+    user.hasNewMessage = status;
+    setOnlineUsers({...onlineUsers});
+    
+  }, [onlineUsers, setOnlineUsers]);
 
   const handlePrivateChat = React.useCallback((message) => {
     if (selectedCurrentUser.current._id) {
@@ -61,7 +59,11 @@ const Chat = () => {
     async function getUsers() {
       try {
         const users = await getUnfollowedUsers(user.username);
-        setUsers(users)
+        const list = {};
+        for (let user of users) {
+          list[`${user._id}`] = user;
+        }
+        setOnlineUsers(list);
       } catch (error) {
         console.log(error);
       }
@@ -73,6 +75,20 @@ const Chat = () => {
     socket.on('connect', () => console.log('connected'));
     checkIfUserExist();
 
+    async function getUsers() {
+      try {
+        const users = await getUnfollowedUsers(user.username);
+        const list = {};
+        for (let user of users) {
+          list[`${user._id}`] = user;
+        }
+        setOnlineUsers(list);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    getUsers();
+
     socket.on('session', async({ sessionId, userId, username }) => {
       if (sessionId && userId && username) {
         socket.auth = { sessionId: sessionId };
@@ -82,15 +98,21 @@ const Chat = () => {
     });
 
     socket.on("users", (data) => {
-      const list = {};
-      for (let user of data) {
-        list[`${user._id}`] = user;
+      async function getUsers() {
+        try {
+          const users = await getUnfollowedUsers(user.username);
+          const list = {};
+          for (let user of users) {
+            list[`${user._id}`] = user;
+          }
+          setOnlineUsers(list);
+        } catch (error) {
+          console.log(error);
+        }
       }
-      // setUsers(data);
-      setOnlineUsers(list);
+      getUsers();
     });
     socket.on('private message', (message) => {
-      console.log('private message')
       handlePrivateChat(message);
     });
     socket.on('user messages', (messages) => userMessages(messages));
@@ -101,7 +123,7 @@ const Chat = () => {
       socket.off('private message');
       socket.off('user messages');
     }
-  }, [socket, checkIfUserExist, userMessages, handlePrivateChat]);
+  }, [socket, checkIfUserExist, userMessages, handlePrivateChat, user.username]);
 
   const onUserSelected = async (user) => {
     setSelectedUser(user);
@@ -114,8 +136,6 @@ const Chat = () => {
     <div className="chat">
       <ChatSideBar
         socket={socket}
-        users={users}
-        setUsers={setUsers}
         user={user}
         setSelectedUser={onUserSelected}
         selectedCurrentUser={selectedCurrentUser}
